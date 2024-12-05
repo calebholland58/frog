@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squish the Frog</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #90EE90;
+            cursor: pointer;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #message {
+            font-size: 32px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: #2c5530;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #message.visible {
+            opacity: 1;
+        }
+        #frog-container {
+            width: 800px;
+            height: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #frog {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: all 0.1s ease;
+        }
+        .squished {
+            transform: scale(1, 0.85);
+        }
+        .super-squished {
+            transform: scale(1, 0.75);
+        }
+    </style>
+</head>
+<body>
+    <div id="message">patience young tadpole</div>
+    <div id="frog-container">
+        <img id="frog" src="https://raw.githubusercontent.com/calebholland58/frog/main/frog1.jpg" alt="Frog">
+    </div>
+
+    <audio id="ribbit">
+        <source src="https://raw.githubusercontent.com/calebholland58/frog/main/ribbit.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="ribbit2">
+        <source src="https://raw.githubusercontent.com/calebholland58/frog/main/ribbit2.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const frog = document.getElementById('frog');
+        const audio = document.getElementById('ribbit');
+        const audio2 = document.getElementById('ribbit2');
+        const message = document.getElementById('message');
+        let state = 'normal'; // 'normal', 'squished', 'super-squished'
+
+        function resetToNormal() {
+            state = 'normal';
+            frog.src = 'https://raw.githubusercontent.com/calebholland58/frog/main/frog1.jpg';
+            frog.classList.remove('squished', 'super-squished');
+            message.classList.remove('visible');
+        }
+
+        function playSecondAudio() {
+            audio2.currentTime = 0; // Reset audio to start
+            audio2.play();
+        }
+
+        document.body.addEventListener('click', () => {
+            switch(state) {
+                case 'normal':
+                    // First click - normal to squished
+                    state = 'squished';
+                    frog.src = 'https://raw.githubusercontent.com/calebholland58/frog/main/frog2.jpg';
+                    frog.classList.add('squished');
+                    audio.play();
+                    
+                    // Reset when audio ends
+                    audio.onended = () => {
+                        if (state !== 'super-squished') {  // Don't reset if super-squished
+                            resetToNormal();
+                        }
+                    };
+                    break;
+
+                case 'squished':
+                    // Second click during squished state
+                    state = 'super-squished';
+                    frog.src = 'https://raw.githubusercontent.com/calebholland58/frog/main/frog3.jpg';
+                    frog.classList.remove('squished');
+                    frog.classList.add('super-squished');
+                    message.classList.add('visible');
+                    audio.pause();
+                    playSecondAudio();
+                    
+                    // Set up reset when second audio ends
+                    audio2.onended = resetToNormal;
+                    break;
+
+                case 'super-squished':
+                    // Replay audio2 if clicked during super-squished state
+                    playSecondAudio();
+                    break;
+            }
+        });
+
+        // Reset everything when audio is stopped
+        audio.onpause = () => {
+            if (state !== 'super-squished') {
+                resetToNormal();
+            }
+        };
+    </script>
+</body>
+</html>
